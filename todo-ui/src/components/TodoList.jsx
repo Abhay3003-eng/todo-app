@@ -1,14 +1,14 @@
 // TodoList.jsx
 import React, { useEffect, useCallback, useRef } from 'react';
 import { useSelector, useDispatch } from 'react-redux';
-import { fetchTodosAsync, toggleTodo } from '../features/todoSlice';
+import { fetchTodosAsync, toggleTodo, updateTodoAsync } from '../features/todoSlice';
 import AddTodo from './AddTodo';
-import { deleteTodo } from '../config/api';
+import { deleteTodo, updateTodo } from '../config/api';
 
 const TodoList = () => {
   const dispatch = useDispatch();
   const { todos = [], loading, error, currentPage, hasMore } = useSelector((state) => state.todos);
-    // console.log("todos",todos)
+  // console.log("todos",todos)
   const observer = useRef();
   const lastTodoRef = useCallback(
     (node) => {
@@ -49,23 +49,21 @@ const TodoList = () => {
         <div className="flex justify-between items-start">
           <div className="font-medium text-gray-800">{todo.title}</div>
           <span
-            className={`inline-block px-2 py-1 text-xs font-semibold rounded-full ${
-              todo.completed
-                ? 'bg-green-100 text-green-800'
-                : 'bg-yellow-100 text-yellow-800'
-            }`}
+            className={`inline-block px-2 py-1 text-xs font-semibold rounded-full ${todo.completed
+              ? 'bg-green-100 text-green-800'
+              : 'bg-yellow-100 text-yellow-800'
+              }`}
           >
             {todo.completed ? 'Completed' : 'Pending'}
           </span>
         </div>
         <div className="mt-3 flex gap-2">
           <button
-            onClick={() => dispatch(toggleTodo({ id: todo._id }))}
-            className={`px-3 py-1 text-sm rounded-md font-medium flex-1 ${
-              todo.completed
-                ? 'bg-blue-100 text-blue-700 hover:bg-blue-200'
-                : 'bg-green-100 text-green-700 hover:bg-green-200'
-            } transition`}
+            onClick={() => dispatch(updateTodoAsync({ id: todo._id, updatedTodo: { completed: !todo.completed } }))}
+            className={`px-3 py-1 text-sm rounded-md font-medium flex-1 ${todo.completed
+              ? 'bg-blue-100 text-blue-700 hover:bg-blue-200'
+              : 'bg-green-100 text-green-700 hover:bg-green-200'
+              } transition`}
           >
             {todo.completed ? 'Undo' : 'Complete'}
           </button>
@@ -120,11 +118,10 @@ const TodoList = () => {
                       <td className="px-6 py-4 text-sm text-gray-800 font-medium">{todo.title}</td>
                       <td className="px-6 py-4 whitespace-nowrap">
                         <span
-                          className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full ${
-                            todo.completed
-                              ? 'bg-green-100 text-green-800'
-                              : 'bg-yellow-100 text-yellow-800'
-                          }`}
+                          className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full ${todo.completed
+                            ? 'bg-green-100 text-green-800'
+                            : 'bg-yellow-100 text-yellow-800'
+                            }`}
                         >
                           {todo.completed ? 'Completed' : 'Pending'}
                         </span>
@@ -132,11 +129,10 @@ const TodoList = () => {
                       <td className="px-6 py-4 whitespace-nowrap space-x-2">
                         <button
                           onClick={() => dispatch(toggleTodo({ id: todo._id }))}
-                          className={`px-3 py-1 text-sm rounded-md font-medium ${
-                            todo.completed
-                              ? 'bg-blue-100 text-blue-700 hover:bg-blue-200'
-                              : 'bg-green-100 text-green-700 hover:bg-green-200'
-                          } transition`}
+                          className={`px-3 py-1 text-sm rounded-md font-medium ${todo.completed
+                            ? 'bg-blue-100 text-blue-700 hover:bg-blue-200'
+                            : 'bg-green-100 text-green-700 hover:bg-green-200'
+                            } transition`}
                         >
                           {todo.completed ? 'Undo' : 'Complete'}
                         </button>
@@ -171,7 +167,7 @@ const TodoList = () => {
         )}
 
         {/* End of list (appears on all screens) */}
-        {!hasMore && todos.length > 0 && (
+        {!hasMore && todos?.length > 0 && (
           <div className="py-4 text-center text-gray-500 text-sm">No more todos to load.</div>
         )}
       </div>

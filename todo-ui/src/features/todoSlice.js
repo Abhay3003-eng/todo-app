@@ -28,10 +28,13 @@ export const addTodoAsync = createAsyncThunk(
 );
 export const updateTodoAsync = createAsyncThunk(
     "todo/updateTodoAsync",
-    async (updatedTodo, { rejectWithValue }) => {
+    async ({ id, updatedTodo }, { rejectWithValue }) => {
         try {
             // Call API to update the todo (assuming you have an updateTodo() function)
-            const response = await updateTodo(updatedTodo);
+            console.log("Updating todo:", id, updatedTodo);
+            const response = await updateTodo(id, updatedTodo);
+            console.log("response:", response);
+
             return response; // Return the updated todo object
         } catch (err) {
             return rejectWithValue(err.message);
@@ -42,11 +45,13 @@ export const updateTodoAsync = createAsyncThunk(
 
 // --- Initial State ---
 const initialState = {
-    todos: null,
+    todos: [],
     loading: false,
     error: null,
     page: 0,
     hasMore: true,
+    pagination: null, // 👈 add this
+    currentPage: 0,   // 👈 you're using this but it's not in initialState
 };
 
 
@@ -92,8 +97,15 @@ const todoSlice = createSlice({
                 state.loading = true;
                 state.error = null;
             })
+            // .addCase(addTodoAsync.fulfilled, (state, action) => {
+            //     state.loading = false;
+            // })
             .addCase(addTodoAsync.fulfilled, (state, action) => {
                 state.loading = false;
+                if (action.payload) {
+                    // Add to top (adjust if you use pagination/sorting)
+                    state.todos = [action.payload, ...state.todos];
+                }
             })
             .addCase(addTodoAsync.rejected, (state, action) => {
                 state.loading = false;
@@ -105,11 +117,25 @@ const todoSlice = createSlice({
                 state.loading = true;
                 state.error = null;
             })
+            // .addCase(updateTodoAsync.fulfilled, (state, action) => {
+            //     state.loading = false;
+            //     console.log("state.todos",state.todos)
+            //     const index = state.todos.findIndex(todo => todo._id === action.payload.id);
+            //     if (index !== -1) {
+            //         state.todos[index] = action.payload; // Replace with updated todo
+            //     }
+            // })
             .addCase(updateTodoAsync.fulfilled, (state, action) => {
                 state.loading = false;
-                const index = state.todos.findIndex(todo => todo.id === action.payload.id);
+                // normalize payload (handle response.data or direct todo)
+                const updated = action.payload && action.payload.data ? action.payload.data : action.payload;
+                console.log("update payload:", action.payload, "normalized:", updated);
+                if (!Array.isArray(state.todos)) state.todos = [];
+                const id = updated && (updated._id || updated.id);
+                if (!id) return;
+                const index = state.todos.findIndex(todo => (todo._id || todo.id) === id);
                 if (index !== -1) {
-                    state.todos[index] = action.payload; // Replace with updated todo
+                    state.todos[index] = updated;
                 }
             })
             .addCase(updateTodoAsync.rejected, (state, action) => {

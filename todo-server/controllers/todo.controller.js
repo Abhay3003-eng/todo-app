@@ -45,17 +45,19 @@ const getTodos = asyncHandler(async (req, res) => {
 
     const pagination = {
         total,
+        elements: todos.length,
         page: safePage,
         limit: safeLimit,
         totalPages,
         hasNext: safePage < totalPages,
         hasPrev: safePage > 1
     };
-
-    ApiResponse.success(res, {
-        todos,
-        pagination
-    }, "Todos fetched successfully");
+    res.status(200).json(
+        ApiResponse.success(res, {
+            todos,
+            pagination
+        }, "Todos fetched successfully")
+    );
 });
 const getTodoById = asyncHandler(async (req, res) => {
     const { id } = req.params;

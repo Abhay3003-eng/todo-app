@@ -5,7 +5,7 @@ export const API = axios.create({
   baseURL: import.meta.env.VITE_API_URL || "http://localhost:8002/api",
 });
 
-export const fetchTodos = async (page) => {
+export const fetchTodos = async (page=0) => {
   const response = await API.get(`/todos?page=${page}&limit=10`);
   if (response.status !== 200) throw new Error("Failed to fetch todos");
 
@@ -17,7 +17,7 @@ export const createTodo = async (title) => {
   return response.data;
 };
 export const updateTodo = async (id, updates) => {
-  const response = await ApiFetch.put(`/todos/${id}`, updates);
+  const response = await API.put(`/todos/${id}`, updates);
   return response.data;
 };
 
